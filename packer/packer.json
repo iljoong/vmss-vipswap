@@ -1,0 +1,64 @@
+{
+    "variables": {
+      "packagepath": "..\\webapi.zip",
+      "rgname": "test-vmss",
+      "imagename": "webapi001",
+
+      "client_id": "_add_here_or_remove_if_using_MSI_",
+      "client_secret": "_add_here_or_remove_if_using_MSI_",
+      "tenant_id": "_add_here_or_remove_if_using_MSI_",
+      "subscription_id": "_add_here_or_remove_if_using_MSI_"
+    },
+    "builders": [
+      {
+        "type": "azure-arm",
+        "client_id": "{{user `client_id`}}",
+        "client_secret": "{{user `client_secret`}}",
+        "tenant_id": "{{user `tenant_id`}}",
+        "subscription_id": "{{user `subscription_id`}}",
+  
+        "managed_image_resource_group_name": "{{user `rgname`}}",
+        "managed_image_name": "{{user `imagename`}}",
+  
+        "os_type": "Windows",
+        "image_publisher": "MicrosoftWindowsServer",
+        "image_offer": "WindowsServerSemiAnnual",
+        "image_sku": "Datacenter-Core-1803-with-Containers-smalldisk",
+  
+        "communicator": "winrm",
+        "winrm_use_ssl": true,
+        "winrm_insecure": true,
+        "winrm_timeout": "5m",
+        "winrm_username": "packer",
+  
+        "location": "koreacentral",
+        "vm_size": "Standard_D2s_v3",
+
+        "async_resourcegroup_delete": "true"
+      }
+    ],
+    "provisioners": [
+      {
+        "type": "file",
+        "source": "{{user `packagepath`}}",
+        "destination": "$env:temp\\package.zip"
+      },
+      {
+        "type": "powershell",
+        "inline": [
+          "Add-WindowsFeature Web-Server,Web-Asp-Net45,NET-Framework-Features",
+          "Invoke-WebRequest https://download.visualstudio.microsoft.com/download/pr/fa3f472e-f47f-4ef5-8242-d3438dd59b42/9b2d9d4eecb33fe98060fd2a2cb01dcd/dotnet-hosting-3.1.0-win.exe -outfile $env:temp\\dotnet-hosting-3.1.0-win.exe",
+  
+          "Start-Process $env:temp\\dotnet-hosting-3.1.0-win.exe  -ArgumentList '/quiet' -Wait",
+          "Expand-Archive $env:temp\\package.zip -DestinationPath C:\\inetpub\\wwwroot -Force"
+        ]
+      },
+      {
+        "type": "powershell",
+        "inline": [
+          "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+          "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+        ]
+      }
+    ]
+  }
