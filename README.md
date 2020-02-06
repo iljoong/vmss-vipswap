@@ -10,10 +10,10 @@ Following architecture provides __NO-downtime VIP swap__ with relatively simple 
 
 ![VIPSWAP_VMSS](./vipswap_vmss.png)
 
-> The magic for VIP swap is by leveraging health-probe (`/api/ping?slot=slot0`) and controlling traffic to the right slot.
+> The magic of VIP swap is by leveraging health-probe (`/api/ping?slot=slot0`) and controlling traffic to the right slot.
 
 For more details:
-- create a PIP for production endpoint (port 80) and a PIP_stage for stage endpoint (port 40080).
+- create a VIP(public IP) for production endpoint (port 80) and a VIP_stage for stage endpoint (port 40080).
 - create two lb_rules for each slot.
 - create an application that awares `/api/ping` endpoint and it returns 200 or 404 depends on its slot (e.g., slot is resloved by VMSS name).
 - create a healthprobe for each slots.
@@ -27,30 +27,32 @@ If you want to access both prod and stage using the same 80 port, you can consid
 - create two nics on VM instance
 - create two backend pools, say `pool0` (slot0/nic0 and slot1/nic1) and `pool1` (slot1/nic0 and slot0/nic1)
   - e.g pool0 - VMSS slot0 with primary nic, VMSS slot1 with secondary nic
-- Azure does not assign a default gateway to secondary nic, see [documentation](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/multiple-nics#configure-guest-os-for-multiple-nics) 
+- Since Azure does not assign a default gateway to secondary nic, set default gateway for secondary nic. see [documentation](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/multiple-nics#configure-guest-os-for-multiple-nics) 
+
+For more information, please refer additioanl [README.md](./terraform/multinic/README.md)
 
 ## Application
 
 In order to VIP swap, application must implement `/api/ping` endpoint and it returns 200 or 404 depends on VMSS slot.
 
-Here is how it implements.
+Here is how it's implemented.
 - VM instance get a slot name from hostname when initializing.
 - Using IMDS to get the hostname and parse the slot name from it.
-    - You can your naming covention and parsing logic to get the right slot name. This example use `workload-prod-vmss-slot0` as a VMSS name.
+    - You can use your own naming covention and parsing logic to get the right slot name. This example use `workload-prod-vmss-slot0` as a VMSS name.
 - For dotnet, use [Singleton DI](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-3.1) to get slot name one time only.
 
 ## Prep
 
 1. Package sample app by running `build.ps1`.
 2. Build VM image using `packer`.
-3. Update `terraform\variabriables.tf` and run `terraform apply` to create a test environment.
+3. Update `terraform\variables.tf` and run `terraform apply` to create a test environment.
 
 ## Test
 
 For simple test, use `curl` to call api and swap VIP by changing healthprobe. (`/api/ping?slot=slot0` -> `/api/ping?slot=slot1`)
 
 ```
-for i in {1..1000}; do out=$(curl -s --connect-timeout 2 -m 2 <app_ip>/api/test); t=$(date '+%H:%M:%S'); echo "$t $out"; sleep 1s; done
+for i in {1..1000}; do out=$(curl -s --connect-timeout 2 -m 2 <app_vip>/api/test); t=$(date '+%H:%M:%S'); echo "$t $out"; sleep 1s; done
 ```
 
 You'll see changing slot without downtime.
@@ -58,7 +60,7 @@ You'll see changing slot without downtime.
 For more more thorough test, use load test tool like [Apache ab](http://httpd.apache.org/docs/current/programs/ab.html).
 
 ```
-ab -n 10000 -c 50 http://<app_ip>/api/test
+ab -n 10000 -c 50 http://<app_vip>/api/test
 ```
 
 ## Update image
