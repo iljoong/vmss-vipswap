@@ -1,3 +1,8 @@
+data "azurerm_key_vault_secret" "password" {
+  name          = "adminpassword"
+  key_vault_id  = var.vault_id
+}
+
 resource "azurerm_public_ip" "tfrg" {
   name                = "${var.vmss_name}-pip"
   location            = azurerm_resource_group.tfrg.location
@@ -141,7 +146,7 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
   os_profile {
     computer_name_prefix = "vmss"
     admin_username       = "iljoong"
-    admin_password       = "Ilkim*202001"
+    admin_password       = data.azurerm_key_vault_secret.password.value
   }
 
   extension {

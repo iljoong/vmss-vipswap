@@ -4,7 +4,7 @@
 
 New-WebBinding -Name "Default Web Site" -Protocol http -Port 40080
 
-netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow protocol=TCP localport=40080
+netsh advfirewall firewall add rule name="Open Port 40080" dir=in action=allow protocol=TCP localport=40080
 
 <#
 # Add SSL cert & HTTPS binding if you need

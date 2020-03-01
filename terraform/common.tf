@@ -19,7 +19,7 @@ resource "azurerm_resource_group" "tfrg" {
 # Create virtual network
 resource "azurerm_virtual_network" "tfvnet" {
   name                = "${var.prefix}-vnet"
-  address_space       = ["10.0.0.0/16"]
+  address_space       = ["10.1.0.0/16"]
   location            = var.location
   resource_group_name = azurerm_resource_group.tfrg.name
 
@@ -32,7 +32,7 @@ resource "azurerm_subnet" "tfdevvnet" {
   name                 = "dev-subnet"
   virtual_network_name = azurerm_virtual_network.tfvnet.name
   resource_group_name  = azurerm_resource_group.tfrg.name
-  address_prefix       = "10.0.1.0/24"
+  address_prefix       = "10.1.1.0/24"
   
   # this is temporary: https://www.terraform.io/docs/providers/azurerm/r/subnet_network_security_group_association.html
   network_security_group_id = azurerm_network_security_group.tfnsg.id
@@ -42,16 +42,22 @@ resource "azurerm_subnet" "tfprdvnet" {
   name                 = "prd-subnet"
   virtual_network_name = azurerm_virtual_network.tfvnet.name
   resource_group_name  = azurerm_resource_group.tfrg.name
-  address_prefix       = "10.0.2.0/24"
+  address_prefix       = "10.1.2.0/24"
 }
 
 resource "azurerm_subnet" "tfagtvnet" {
   name                 = "agt-subnet"
   virtual_network_name = azurerm_virtual_network.tfvnet.name
   resource_group_name  = azurerm_resource_group.tfrg.name
-  address_prefix       = "10.0.0.0/24"
+  address_prefix       = "10.1.3.0/24"
 }
 
+resource "azurerm_subnet" "tfappgwvnet" {
+  name                 = "appgw-subnet"
+  virtual_network_name = azurerm_virtual_network.tfvnet.name
+  resource_group_name  = azurerm_resource_group.tfrg.name
+  address_prefix       = "10.1.0.0/24"
+}
 
 # Create Network Security Group and rule
 resource "azurerm_network_security_group" "tfnsg" {

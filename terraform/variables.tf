@@ -41,3 +41,7 @@ variable "vmss_name" {
 variable "tag" {
     default = "test"
 }
+
+variable "vault_id" {
+    default = "_add_here_"
+}
