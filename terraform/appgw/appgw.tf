@@ -111,3 +111,7 @@ resource "azurerm_application_gateway" "tfappgw" {
     name = "slot1"
   }
 }
+
+output "pip_address" {
+  value = azurerm_public_ip.tfappgw.ip_address
+}

@@ -1,4 +1,10 @@
 # VMSS VM
+
+data "azurerm_key_vault_secret" "password" {
+  name          = "adminpassword"
+  key_vault_id  = var.vault_id
+}
+
 resource "azurerm_virtual_machine_scale_set" "tfrg" {
   name                = "${var.vmss_name}-slot0"
   location            = azurerm_resource_group.tfrg.location
@@ -28,8 +34,8 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
   }
 
   os_profile {
-    computer_name_prefix = "vmss"
-    admin_username       = "iljoong"
+    computer_name_prefix = var.prefix
+    admin_username       = var.admin_username
     admin_password       = data.azurerm_key_vault_secret.password.value
   }
 
@@ -55,7 +61,7 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
       name                                   = "ipconfig-slot0"
       primary                                = true
       subnet_id                              = azurerm_subnet.tfdevvnet.id
-      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bpepool.id]
+      #load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bpepool.id]
       #load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.lbnatpool.id]
       application_gateway_backend_address_pool_ids = [azurerm_application_gateway.tfappgw.backend_address_pool[0].id]
     }
@@ -91,9 +97,9 @@ resource "azurerm_virtual_machine_scale_set" "tfrg1" {
   }
 
   os_profile {
-    computer_name_prefix = "vmss"
-    admin_username       = "iljoong"
-    admin_password       = "Ilkim*202001"
+    computer_name_prefix = var.prefix
+    admin_username       = var.admin_username
+    admin_password       = data.azurerm_key_vault_secret.password.value
   }
 
   extension {
@@ -118,20 +124,9 @@ resource "azurerm_virtual_machine_scale_set" "tfrg1" {
       name                                   = "ipconfig-slot1"
       primary                                = true
       subnet_id                              = azurerm_subnet.tfdevvnet.id
-      load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bpepool.id]
+      #load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bpepool.id]
       #load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.lbnatpool_stage.id]
       application_gateway_backend_address_pool_ids = [azurerm_application_gateway.tfappgw.backend_address_pool[1].id]
     }
   }
-  
 }
-
-/*
-output "pip_address" {
-  value = azurerm_public_ip.tfrg.ip_address
-}
-
-output "pip_stage_address" {
-  value = azurerm_public_ip.tfrg_stage.ip_address
-}
-*/

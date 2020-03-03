@@ -1,9 +1,5 @@
-data "azurerm_key_vault_secret" "password" {
-  name          = "adminpassword"
-  key_vault_id  = var.vault_id
-}
+# Pulic LB
 
-/*
 resource "azurerm_public_ip" "tfrg" {
   name                = "${var.vmss_name}-pip"
   location            = azurerm_resource_group.tfrg.location
@@ -23,7 +19,6 @@ resource "azurerm_public_ip" "tfrg_stage" {
 
   sku                 = "Standard"
 }
-*/
 
 resource "azurerm_lb" "tfrg" {
   name                = "${var.vmss_name}-lb"
@@ -33,19 +28,13 @@ resource "azurerm_lb" "tfrg" {
   sku                 = "Standard"
 
   frontend_ip_configuration {
-    name                 = "${var.vmss_name}-ip"
-    #public_ip_address_id = azurerm_public_ip.tfrg.id
-    private_ip_address_allocation = "Static"
-    subnet_id                     = azurerm_subnet.tfdevvnet.id
-    private_ip_address            = "10.1.1.100"
+    name                 = "${var.vmss_name}-pip"
+    public_ip_address_id = azurerm_public_ip.tfrg.id
   }
 
   frontend_ip_configuration {
-    name                 = "${var.vmss_name}-ip-stage"
-    #public_ip_address_id = azurerm_public_ip.tfrg_stage.id
-    private_ip_address_allocation = "Static"
-    subnet_id                     = azurerm_subnet.tfdevvnet.id
-    private_ip_address            = "10.1.1.101"
+    name                 = "${var.vmss_name}-pip-stage"
+    public_ip_address_id = azurerm_public_ip.tfrg_stage.id
   }
 
   tags = {
@@ -60,7 +49,7 @@ resource "azurerm_lb_rule" "tfrg" {
   protocol                       = "Tcp"
   frontend_port                  = 80
   backend_port                   = 80
-  frontend_ip_configuration_name = azurerm_lb.tfrg.frontend_ip_configuration[0].name #"${var.vmss_name}-ip"
+  frontend_ip_configuration_name = "${var.vmss_name}-pip"
   backend_address_pool_id        = azurerm_lb_backend_address_pool.bpepool.id
   probe_id                       = azurerm_lb_probe.tfrg.id
 }
@@ -72,7 +61,7 @@ resource "azurerm_lb_rule" "tfrg_stage" {
   protocol                       = "Tcp"
   frontend_port                  = 40080
   backend_port                   = 40080
-  frontend_ip_configuration_name = azurerm_lb.tfrg.frontend_ip_configuration[1].name #"${var.vmss_name}-pip-stage"
+  frontend_ip_configuration_name = "${var.vmss_name}-pip-stage"
   backend_address_pool_id        = azurerm_lb_backend_address_pool.bpepool.id
   probe_id                       = azurerm_lb_probe.tfrg_stage.id
 }
@@ -83,7 +72,6 @@ resource "azurerm_lb_backend_address_pool" "bpepool" {
   name                = "${var.vmss_name}-bepool"
 }
 
-/*
 resource "azurerm_lb_nat_pool" "lbnatpool" {
   resource_group_name            = azurerm_resource_group.tfrg.name
   name                           = "RDP"
@@ -105,7 +93,6 @@ resource "azurerm_lb_nat_pool" "lbnatpool_stage" {
   backend_port                   = 3389
   frontend_ip_configuration_name = "${var.vmss_name}-pip-stage"
 }
-*/
 
 resource "azurerm_lb_probe" "tfrg" {
   resource_group_name = azurerm_resource_group.tfrg.name
@@ -123,4 +110,12 @@ resource "azurerm_lb_probe" "tfrg_stage" {
   protocol            = "Http"
   request_path        = "/api/ping?slot=slot1"
   port                = 40080
+}
+
+output "pip_address" {
+  value = azurerm_public_ip.tfrg.ip_address
+}
+
+output "pip_stage_address" {
+  value = azurerm_public_ip.tfrg_stage.ip_address
 }

@@ -1,6 +1,6 @@
-# Other architecture: multi-nic VM 
+## Other architecture: multi-nic VM 
 
-## config
+### config
 
 Set default gateway for secondary nic
 

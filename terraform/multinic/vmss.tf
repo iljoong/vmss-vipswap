@@ -141,9 +141,9 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
   }
 
   os_profile {
-    computer_name_prefix = "vmss"
-    admin_username       = "iljoong"
-    admin_password       = "Ilkim*202001"
+    computer_name_prefix = var.prefix
+    admin_username       = var.admin_username
+    admin_password       = data.azurerm_key_vault_secret.password.value
   }
 
   extension {
@@ -217,9 +217,9 @@ resource "azurerm_virtual_machine_scale_set" "tfrg1" {
   }
 
   os_profile {
-    computer_name_prefix = "vmss"
-    admin_username       = "iljoong"
-    admin_password       = "Ilkim*202001"
+    computer_name_prefix = var.prefix
+    admin_username       = var.admin_username
+    admin_password       = data.azurerm_key_vault_secret.password.value
   }
 
   extension {
