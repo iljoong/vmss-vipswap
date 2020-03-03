@@ -44,5 +44,11 @@ namespace webapi.Controllers
             return $"{hostname}: {slotname}";
         }
 
+        [HttpGet("/")]
+        public ActionResult GetDefault()
+        {
+            return Ok();
+        }
+
     }
 }

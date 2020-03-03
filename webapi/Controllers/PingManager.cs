@@ -56,21 +56,27 @@ namespace webapi
         // GET Azure VM Name using IMDS
         public async Task<string> GetIMDS()
         {
-            using (var client = new HttpClient())
+            try
             {
-                client.BaseAddress = new Uri("http://169.254.169.254");
-                var request = new HttpRequestMessage(HttpMethod.Get, "metadata/instance/compute?api-version=2019-06-04");
+                using (var client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://169.254.169.254");
+                    var request = new HttpRequestMessage(HttpMethod.Get, "metadata/instance/compute?api-version=2019-06-04");
 
-                client.DefaultRequestHeaders.Add("Metadata", "true");
-                var response = await client.SendAsync(request);
+                    client.DefaultRequestHeaders.Add("Metadata", "true");
+                    var response = await client.SendAsync(request);
 
-                var res = await response.Content.ReadAsStringAsync();
-                var imds = JsonConvert.DeserializeObject<IMDS>(res);
+                    var res = await response.Content.ReadAsStringAsync();
+                    var imds = JsonConvert.DeserializeObject<IMDS>(res);
 
-                return imds.name;
+                    return imds.name;
 
+                }
             }
-
+            catch
+            {
+                return "workload-prod-vmss-slotX";
+            }
         }
 
     }

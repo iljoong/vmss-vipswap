@@ -6,7 +6,7 @@ For blue-green deployment, VIP swap is the one of well-known methods. VMSS does 
 
 ## Architecture
 
-Following architecture provides __NO-downtime VIP swap__ with relatively simple implementation.
+Following architecture provides __NO downtime VIP swap__ with relatively simple implementation.
 
 ![VIPSWAP_VMSS](./vipswap_vmss.png)
 
@@ -30,6 +30,12 @@ If you want to access both prod and stage using the same 80 port, you can consid
 - Since Azure does not assign a default gateway to secondary nic, set default gateway for secondary nic. see [documentation](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/multiple-nics#configure-guest-os-for-multiple-nics) 
 
 For more information, please refer additioanl [README.md](./terraform/multinic/README.md)
+
+### Other Samples
+
+- __Application Gateway__ instead of public LB: [terraform/appgw/](./terraform/appgw/)
+- __Internal LB__: [terraform/ilb/](./terraform/ilb/)
+
 
 ## Application
 
@@ -63,7 +69,7 @@ For more more thorough test, use load test tool like [Apache ab](http://httpd.ap
 ab -n 10000 -c 50 http://<app_vip>/api/test
 ```
 
-## Update image
+## Update(Deploy) image
 
 To deploy new app package using VM image to stage slot, you can run following cli 
 
