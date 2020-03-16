@@ -2,8 +2,8 @@
 
 resource "azurerm_lb" "tfrg" {
   name                = "${var.vmss_name}-lb"
-  location            = azurerm_resource_group.tfrg.location
-  resource_group_name = azurerm_resource_group.tfrg.name
+  location            = var.location
+  resource_group_name = var.rgname
 
   sku                 = "Standard"
 
@@ -11,7 +11,7 @@ resource "azurerm_lb" "tfrg" {
     name                 = "${var.vmss_name}-ip"
     #public_ip_address_id = azurerm_public_ip.tfrg.id
     private_ip_address_allocation = "Static"
-    subnet_id                     = azurerm_subnet.tfdevvnet.id
+    subnet_id                     = var.subnet_id
     private_ip_address            = "10.1.1.100"
   }
 
@@ -19,7 +19,7 @@ resource "azurerm_lb" "tfrg" {
     name                 = "${var.vmss_name}-ip-stage"
     #public_ip_address_id = azurerm_public_ip.tfrg_stage.id
     private_ip_address_allocation = "Static"
-    subnet_id                     = azurerm_subnet.tfdevvnet.id
+    subnet_id                     = var.subnet_id
     private_ip_address            = "10.1.1.101"
   }
 
@@ -29,7 +29,7 @@ resource "azurerm_lb" "tfrg" {
 }
 
 resource "azurerm_lb_rule" "tfrg" {
-  resource_group_name            = azurerm_resource_group.tfrg.name
+  resource_group_name            = var.rgname
   loadbalancer_id                = azurerm_lb.tfrg.id
   name                           = "${var.vmss_name}-lbrule"
   protocol                       = "Tcp"
@@ -41,7 +41,7 @@ resource "azurerm_lb_rule" "tfrg" {
 }
 
 resource "azurerm_lb_rule" "tfrg_stage" {
-  resource_group_name            = azurerm_resource_group.tfrg.name
+  resource_group_name            = var.rgname
   loadbalancer_id                = azurerm_lb.tfrg.id
   name                           = "${var.vmss_name}-lbrule-stage"
   protocol                       = "Tcp"
@@ -53,13 +53,13 @@ resource "azurerm_lb_rule" "tfrg_stage" {
 }
 
 resource "azurerm_lb_backend_address_pool" "bpepool" {
-  resource_group_name = azurerm_resource_group.tfrg.name
+  resource_group_name = var.rgname
   loadbalancer_id     = azurerm_lb.tfrg.id
   name                = "${var.vmss_name}-bepool"
 }
 
 resource "azurerm_lb_probe" "tfrg" {
-  resource_group_name = azurerm_resource_group.tfrg.name
+  resource_group_name = var.rgname
   loadbalancer_id     = azurerm_lb.tfrg.id
   name                = "http-probe"
   protocol            = "Http"
@@ -68,10 +68,18 @@ resource "azurerm_lb_probe" "tfrg" {
 }
 
 resource "azurerm_lb_probe" "tfrg_stage" {
-  resource_group_name = azurerm_resource_group.tfrg.name
+  resource_group_name = var.rgname
   loadbalancer_id     = azurerm_lb.tfrg.id
   name                = "http-probe-stage"
   protocol            = "Http"
   request_path        = "/api/ping?slot=slot1"
   port                = 40080
+}
+
+output "ip_address" {
+  value = azurerm_lb.tfrg.frontend_ip_configuration[0].private_ip_address
+}
+
+output "ip_stage_address" {
+  value = azurerm_lb.tfrg.frontend_ip_configuration[1].private_ip_address
 }

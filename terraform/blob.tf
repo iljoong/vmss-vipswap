@@ -28,7 +28,7 @@ resource "azurerm_storage_blob" "tfblob_script" {
   storage_account_name   = azurerm_storage_account.tfblob.name
   storage_container_name = azurerm_storage_container.tfblob.name
 
-  type   = "block"
+  type   = "Block"
   source = "./script/setupiis.ps1"
 }
 

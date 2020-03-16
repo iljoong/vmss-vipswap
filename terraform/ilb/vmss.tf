@@ -1,14 +1,8 @@
 # VMSS VM
-
-data "azurerm_key_vault_secret" "password" {
-  name          = "adminpassword"
-  key_vault_id  = var.vault_id
-}
-
 resource "azurerm_virtual_machine_scale_set" "tfrg" {
   name                = "${var.vmss_name}-slot0"
-  location            = azurerm_resource_group.tfrg.location
-  resource_group_name = azurerm_resource_group.tfrg.name
+  location            = var.location
+  resource_group_name = var.rgname
 
   automatic_os_upgrade = false
   upgrade_policy_mode  = "Automatic"
@@ -36,7 +30,7 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
   os_profile {
     computer_name_prefix = var.prefix
     admin_username       = var.admin_username
-    admin_password       = data.azurerm_key_vault_secret.password.value
+    admin_password       = var.admin_password #data.azurerm_key_vault_secret.password.value
   }
 
   extension {
@@ -47,7 +41,7 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
     auto_upgrade_minor_version = true
     settings             = <<EOT
         {
-          "fileUris": ["${azurerm_storage_account.tfblob.primary_blob_endpoint}script/setupiis.ps1"],
+          "fileUris": ["${var.blob_uri}script/setupiis.ps1"],
           "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File setupiis.ps1"
         }
         EOT
@@ -60,7 +54,7 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
     ip_configuration {
       name                                   = "ipconfig-slot0"
       primary                                = true
-      subnet_id                              = azurerm_subnet.tfdevvnet.id
+      subnet_id                              = var.subnet_id
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bpepool.id]
       #load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.lbnatpool.id]
     }
@@ -69,8 +63,8 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
 
 resource "azurerm_virtual_machine_scale_set" "tfrg1" {
   name                = "${var.vmss_name}-slot1"
-  location            = azurerm_resource_group.tfrg.location
-  resource_group_name = azurerm_resource_group.tfrg.name
+  location            = var.location
+  resource_group_name = var.rgname
 
   automatic_os_upgrade = false
   upgrade_policy_mode  = "Automatic"
@@ -98,7 +92,7 @@ resource "azurerm_virtual_machine_scale_set" "tfrg1" {
   os_profile {
     computer_name_prefix = var.prefix
     admin_username       = var.admin_username
-    admin_password       = data.azurerm_key_vault_secret.password.value
+    admin_password       = var.admin_password #data.azurerm_key_vault_secret.password.value
   }
 
   extension {
@@ -109,10 +103,10 @@ resource "azurerm_virtual_machine_scale_set" "tfrg1" {
     auto_upgrade_minor_version = true
     settings             = <<EOT
         {
-          "fileUris": ["${azurerm_storage_account.tfblob.primary_blob_endpoint}script/setupiis.ps1"],
+          "fileUris": ["${var.blob_uri}script/setupiis.ps1"],
           "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File setupiis.ps1"
         }
-        EOT                    
+        EOT
   }
 
   network_profile {
@@ -122,7 +116,7 @@ resource "azurerm_virtual_machine_scale_set" "tfrg1" {
     ip_configuration {
       name                                   = "ipconfig-slot1"
       primary                                = true
-      subnet_id                              = azurerm_subnet.tfdevvnet.id
+      subnet_id                              = var.subnet_id
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.bpepool.id]
       #load_balancer_inbound_nat_rules_ids    = [azurerm_lb_nat_pool.lbnatpool_stage.id]
     }

@@ -6,6 +6,15 @@ VIP Swap Sample script for Application Gateway
 
 For implementation of VIP Swap with App Gateway, see this [doc](https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-faq#how-do-i-do-a-vip-swap-for-virtual-machine-scale-sets-in-the-same-subscription-and-same-region)
 
+### Run
+
+1. Update __load balancer_ type to `./appgw` in `main.tf`.
+
+```
+    source    = "./appgw" # ["./appgw", "./plb", "./ilb"]
+```
+2. run `terraform apply` to create a test environment.
+
 ### Update/Deploy Image
 
 Script for deploy an image to stage slot
