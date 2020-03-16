@@ -4,6 +4,8 @@ provider "azurerm" {
   client_id       = var.client_id
   client_secret   = var.client_secret
   tenant_id       = var.tenant_id
+
+  features {}
 }
 
 # Create a resource group if it doesn’t exist
@@ -35,7 +37,7 @@ resource "azurerm_subnet" "tfdevvnet" {
   address_prefix       = "10.1.1.0/24"
   
   # this is temporary: https://www.terraform.io/docs/providers/azurerm/r/subnet_network_security_group_association.html
-  network_security_group_id = azurerm_network_security_group.tfnsg.id
+  #network_security_group_id = azurerm_network_security_group.tfnsg.id
 }
 
 resource "azurerm_subnet" "tfprdvnet" {

@@ -3,8 +3,8 @@
 #
 resource "azurerm_public_ip" "tfappgw" {
   name                = "appgw-pip"
-  resource_group_name = azurerm_resource_group.tfrg.name
-  location            = azurerm_resource_group.tfrg.location
+  resource_group_name = var.rgname
+  location            = var.location
   allocation_method   = "Static"
 
   sku                 = "Standard"
@@ -12,8 +12,8 @@ resource "azurerm_public_ip" "tfappgw" {
 
 resource "azurerm_application_gateway" "tfappgw" {
   name                = "${var.prefix}-appgw"
-  resource_group_name = azurerm_resource_group.tfrg.name
-  location            = azurerm_resource_group.tfrg.location
+  resource_group_name = var.rgname
+  location            = var.location
 
   sku {
     name     = "Standard_v2"
@@ -23,7 +23,7 @@ resource "azurerm_application_gateway" "tfappgw" {
 
   gateway_ip_configuration {
     name      = "appgw-ip-configuration"
-    subnet_id = azurerm_subnet.tfappgwvnet.id
+    subnet_id = var.subnet_appgw_id
   }
 
   frontend_ip_configuration {
@@ -112,6 +112,10 @@ resource "azurerm_application_gateway" "tfappgw" {
   }
 }
 
-output "pip_address" {
+output "ip_address" {
+  value = azurerm_public_ip.tfappgw.ip_address
+}
+
+output "ip_stage_address" {
   value = azurerm_public_ip.tfappgw.ip_address
 }
