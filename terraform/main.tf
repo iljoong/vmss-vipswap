@@ -1,5 +1,5 @@
 module "vmss" {
-    source    = "./appgw" # ["./appgw", "./plb", "./ilb"]
+    source    = "./plb" # ["./appgw", "./plb", "./ilb"]
     rgname    = azurerm_resource_group.tfrg.name
     location  = var.location
 

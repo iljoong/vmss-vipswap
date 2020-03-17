@@ -22,6 +22,7 @@
       "winrm_timeout": "5m",
       "winrm_username": "packer",
 
+      "location": "koreacentral",
       "vm_size": "Standard_D2s_v3",
 
       "async_resourcegroup_delete": "true"

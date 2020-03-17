@@ -9,7 +9,6 @@ trigger:
 variables:
 - group: azure_build
 - group: azure_subscription
-- group: azure_vmss
 - name: appgwname
   value: vmss-appgw
 - name: httprulename
@@ -18,11 +17,13 @@ variables:
   value: http-rule-stage
 - name: vmssrgname
   value: vmss-rg
-
+- name: system.debug
+  value: false
+  
 resources:
   pipelines:
   - pipeline: build_artifact
-    source: build-blobcp-pipeline
+    source: build-filecp-pipeline
 
 stages:
 - stage: QA

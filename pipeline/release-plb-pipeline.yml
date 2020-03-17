@@ -9,18 +9,17 @@ trigger:
 variables:
 - group: azure_build
 - group: azure_subscription
-- group: azure_vmss
 - name: lbname
   value: api-prod-vmss-lb
 - name: vmssrgname
   value: vmss-rg
 - name: system.debug
-  value: true
+  value: false
 
 resources:
   pipelines:
   - pipeline: build_artifact
-    source: build-blobcp-pipeline
+    source: build-filecp-pipeline
 
 stages:
 - stage: QA
