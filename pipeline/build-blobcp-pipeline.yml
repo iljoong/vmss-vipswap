@@ -1,0 +1,65 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- none
+
+pool:
+  name: 'ilkim'
+
+variables:
+- group: azure_build
+- name: buildConfiguration
+  value: 'Release'
+- name: system.debug
+  value: 'false'
+
+steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: 'webapi/webapi.csproj'
+    arguments: '-c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/app$(Build.BuildId)'
+    modifyOutputPath: false
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Write your PowerShell commands here.
+      Write-Host "Build.ArtifactStagingDirectory: $(Build.ArtifactStagingDirectory)"
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: 'MyAzure_Subscription'
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # get storage key
+      $key = (az storage account keys list -n $(blobaccount) --query "[0].value" -o tsv)
+      # upload file to blobstorage
+      az storage blob upload -c $(container) -n app$(Build.BuildId).zip -f $(Build.ArtifactStagingDirectory)/app$(Build.BuildId)/app$(Build.BuildId).zip --account-name $(blobaccount) --account-key $key --no-progress
+      # create sas token
+      $end = (Get-Date).AddMinutes(30).ToString("yyyy-MM-ddThh:mm:ssZ")
+      $sasurl = (az storage blob generate-sas -c $(container) -n app$(Build.BuildId).zip --account-name $(blobaccount) --account-key $key --permissions r --expiry $end --full-uri -o tsv)
+      echo "##vso[task.setvariable variable=packageurl]$sasurl"
+
+- task: PackerBuild@1
+  inputs:
+    templateType: 'custom'
+    customTemplateLocation: './packer/packer_blob.json'
+    customTemplateParameters: |
+      {
+        "packagepath": "$(packageurl)",
+        "imagename":"$(imagename)",
+        "rgname":"$(rgname)"
+      }

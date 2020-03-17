@@ -41,7 +41,9 @@ namespace webapi.Controllers
         {
             string hostname = Dns.GetHostName();
             string slotname =_pingManager.GetSlotName();
-            return $"{hostname}: {slotname}";
+            string filever = _pingManager.GetFileVersion();
+
+            return $"{filever}::{hostname}::{slotname}";
         }
 
         [HttpGet("/")]

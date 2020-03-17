@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,15 +20,20 @@ namespace webapi
     {
         string GetVMName();
         string GetSlotName();
+
+        string GetFileVersion();
     }
 
     public class PingManager : IPingManager
     {
         string _vmname = "_NONAME_";
         string _slot = "_SLOT_";
+        string _fileversion = "_0_";
 
         public PingManager(IConfiguration _config)
         {
+            _fileversion = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion;
+
             // get VMName using metadataservice
             //curl.exe -H Metadata:true http://169.254.169.254/metadata/instance/compute?api-version=2019-06-04
 
@@ -51,6 +57,11 @@ namespace webapi
         public string GetSlotName()
         {
             return _slot;
+        }
+
+        public string GetFileVersion()
+        {
+            return _fileversion;
         }
 
         // GET Azure VM Name using IMDS

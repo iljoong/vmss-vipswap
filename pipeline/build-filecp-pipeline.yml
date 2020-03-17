@@ -1,0 +1,59 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+# trigger set
+trigger: none
+#trigger:
+#- master
+
+pool:
+  name: 'ilkim'
+
+variables:
+- group: azure_subscription
+- group: azure_build
+- name: buildConfiguration
+  value: 'Release'
+
+steps:
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: '**/*.csproj'
+    arguments: '-c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)/app'
+    modifyOutputPath: false
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # Debug
+      Write-Host "$(Build.ArtifactStagingDirectory)\app\app.zip"
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      # modify path string for Windows env and set VSO variable
+      $mpath = $env:BUILD_ARTIFACTSTAGINGDIRECTORY -replace "\\","\\\\"
+      Write-Host "##vso[task.setvariable variable=mpath]$mpath"
+
+- task: PackerBuild@1
+  inputs:
+    templateType: 'custom'
+    customTemplateLocation: 'packer/packer_file.json'
+    customTemplateParameters: |
+      {
+        "packagepath":"$(mpath)\\\\app\\\\app.zip",
+        "imagename":"$(imagename)",
+        "rgname":"$(rgname)"
+      }
