@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <Version Condition=" '$(BUILD_BUILDNUMBER)' == '' ">$(VersionPrefix).local</Version>
+    <Version Condition=" '$(BUILD_BUILDNUMBER)' == '' ">$(VersionPrefix).0000</Version>
     <Version Condition=" '$(BUILD_BUILDNUMBER)' != '' ">$(VersionPrefix).$(BUILD_BUILDNUMBER)</Version>
   </PropertyGroup>
 

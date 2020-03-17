@@ -19,7 +19,7 @@ if ($cmd -eq "" -or $cmd -eq "build")
 elseif ($cmd -eq "clean")
 {
     Write-Host "cleaning..."
-    Get-ChildItem .\ -include bin,obj,.terrafrom,*.zip -Recurse | % { remove-item $_.fullname -Force -Recurse }
+    Get-ChildItem .\ -include bin,obj,.terraform,terraform.tfstate*,*.zip -Recurse | % {  echo $_.fullname; remove-item $_.fullname -Force -Recurse }
 }
 else
 {

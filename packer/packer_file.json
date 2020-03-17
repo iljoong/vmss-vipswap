@@ -2,20 +2,11 @@
   "variables": {
     "packagepath": "..\\webapi.zip",
     "rgname": "test-vmss",
-    "imagename": "webapi001",
-
-    "client_id": "_add_here_or_remove_if_using_MSI_",
-    "client_secret": "_add_here_or_remove_if_using_MSI_",
-    "tenant_id": "_add_here_or_remove_if_using_MSI_",
-    "subscription_id": "_add_here_or_remove_if_using_MSI_"
+    "imagename": "webapi001"
   },
   "builders": [
     {
       "type": "azure-arm",
-      "client_id": "{{user `client_id`}}",
-      "client_secret": "{{user `client_secret`}}",
-      "tenant_id": "{{user `tenant_id`}}",
-      "subscription_id": "{{user `subscription_id`}}",
 
       "managed_image_resource_group_name": "{{user `rgname`}}",
       "managed_image_name": "{{user `imagename`}}",
