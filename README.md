@@ -1,7 +1,5 @@
 # VMSS VIP swap
 
-> _Terraform AzureRM_ 2.1
-
 ## Background
 
 For blue-green deployment, VIP swap is the one of well-known methods. VMSS does provide various deployment/update methods but it does not currently support VIP swap. There are some implementations of VIP swap for VMSS, such as [swapping IPs of two LBs](https://msftstack.wordpress.com/2017/02/24/vip-swap-blue-green-deployment-in-azure-resource-manager/) but this requires about ~1 min downtime.

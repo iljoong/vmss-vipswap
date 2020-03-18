@@ -13,8 +13,8 @@
 
       "os_type": "Windows",
       "image_publisher": "MicrosoftWindowsServer",
-      "image_offer": "WindowsServerSemiAnnual",
-      "image_sku": "Datacenter-Core-1803-with-Containers-smalldisk",
+      "image_offer": "WindowsServer",
+      "image_sku": "datacenter-core-1909-with-containers-smalldisk",
 
       "communicator": "winrm",
       "winrm_use_ssl": true,
