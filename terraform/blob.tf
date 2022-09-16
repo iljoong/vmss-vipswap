@@ -19,7 +19,7 @@ resource "azurerm_storage_account" "tfblob" {
 resource "azurerm_storage_container" "tfblob" {
   name                  = "script"
   storage_account_name  = azurerm_storage_account.tfblob.name
-  container_access_type = "blob"
+  container_access_type = "private" //"blob"
 }
 
 resource "azurerm_storage_blob" "tfblob_script" {

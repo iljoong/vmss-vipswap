@@ -3,8 +3,17 @@ build and make zip package
 #>
 
 param (
-    [string]$cmd
+    [string]$cmd,
+    [string]$ver
 )
+
+$env:BUILD_BUILDID="0"
+
+if ($ver -ne "")
+{
+    $env:BUILD_BUILDID=$ver
+}
+Write-Host "BUILDID=$ver"
 
 if ($cmd -eq "" -or $cmd -eq "build")
 {

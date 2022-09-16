@@ -45,3 +45,11 @@ variable "tag" {
 variable "vault_id" {
     default = "_add_here_"
 }
+
+variable "managedid_rgname" {
+    default = "_add_here_"
+}
+
+variable "managedid_name" {
+    default = "_add_here_"
+}

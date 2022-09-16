@@ -1,37 +1,43 @@
 # VMSS
-resource "azurerm_virtual_machine_scale_set" "tfrg" {
+data "azurerm_user_assigned_identity" "tfmid" {
+  name                = var.managedid_name
+  resource_group_name = var.managedid_rgname
+}
+
+resource "azurerm_windows_virtual_machine_scale_set" "tfrg" {
+
   name                = "${var.vmss_name}-slot0"
   location            = var.location
   resource_group_name = var.rgname
 
-  automatic_os_upgrade = false
-  upgrade_policy_mode  = "Automatic"
+  upgrade_mode        = "Automatic"
+  automatic_os_upgrade_policy {
+    disable_automatic_rollback  = true
+    enable_automatic_os_upgrade = false
+  }
 
   overprovision        = false
 
-  sku {
-    name     = "Standard_D2s_v3"
-    tier     = "Standard"
-    capacity = 2
+  sku                  = "Standard_D2as_v4"
+  instances            = 2
+
+  computer_name_prefix  = var.prefix
+  admin_username        = var.admin_username
+  admin_password        = var.admin_password
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Premium_LRS"
+    //disk_size_gb    = 128
   }
 
-  storage_profile_os_disk {
-    name              = ""
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    os_type           = "windows"
-    managed_disk_type = "Premium_LRS"
-  }
-
-  storage_profile_image_reference {
-    id                = var.image_uri
-  }
-
-  os_profile {
-    computer_name_prefix = var.prefix
-    admin_username       = var.admin_username
-    admin_password       = var.admin_password
-  }
+  source_image_id = var.image_uri
+  /*source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "datacenter-core-1909-with-containers-smalldisk"
+    version   = "latest"
+  }*/
 
   extension {
     name                 = "CustomScriptExtension"
@@ -39,15 +45,22 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
     type                 = "CustomScriptExtension"
     type_handler_version = "1.10"
     auto_upgrade_minor_version = true
-    settings             = <<EOT
+    settings             = "{}"
+    protected_settings   = <<EOT
         {
           "fileUris": ["${var.blob_uri}script/setupiis.ps1"],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File setupiis.ps1"
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File setupiis.ps1",
+          "managedIdentity": { "clientId": "${data.azurerm_user_assigned_identity.tfmid.client_id}" }
         }
         EOT
   }
 
-  network_profile {
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [ data.azurerm_user_assigned_identity.tfmid.id ]
+  }
+
+  network_interface {
     name    = "networkprofileslot0"
     primary = true
 
@@ -61,39 +74,40 @@ resource "azurerm_virtual_machine_scale_set" "tfrg" {
   }
 }
 
-resource "azurerm_virtual_machine_scale_set" "tfrg1" {
+resource "azurerm_windows_virtual_machine_scale_set" "tfrg1" {
+
   name                = "${var.vmss_name}-slot1"
   location            = var.location
   resource_group_name = var.rgname
 
-  automatic_os_upgrade = false
-  upgrade_policy_mode  = "Automatic"
+  upgrade_mode        = "Automatic"
+  automatic_os_upgrade_policy {
+    disable_automatic_rollback  = true
+    enable_automatic_os_upgrade = false
+  }
 
   overprovision        = false
 
-  sku {
-    name     = "Standard_D2s_v3"
-    tier     = "Standard"
-    capacity = 2
+  sku                  = "Standard_D2as_v4"
+  instances            = 2
+
+  computer_name_prefix  = var.prefix
+  admin_username        = var.admin_username
+  admin_password        = var.admin_password
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Premium_LRS"
+    //disk_size_gb    = 128
   }
 
-  storage_profile_os_disk {
-    name              = ""
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    os_type           = "windows"
-    managed_disk_type = "Premium_LRS"
-  }
-
-  storage_profile_image_reference {
-    id                = var.image_uri
-  }
-
-  os_profile {
-    computer_name_prefix = var.prefix
-    admin_username       = var.admin_username
-    admin_password       = var.admin_password #data.azurerm_key_vault_secret.password.value
-  }
+  source_image_id = var.image_uri
+  /*source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "datacenter-core-1909-with-containers-smalldisk"
+    version   = "latest"
+  }*/
 
   extension {
     name                 = "CustomScriptExtension"
@@ -101,15 +115,22 @@ resource "azurerm_virtual_machine_scale_set" "tfrg1" {
     type                 = "CustomScriptExtension"
     type_handler_version = "1.10"
     auto_upgrade_minor_version = true
-    settings             = <<EOT
+    settings             = "{}"
+    protected_settings   = <<EOT
         {
           "fileUris": ["${var.blob_uri}script/setupiis.ps1"],
-          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File setupiis.ps1"
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File setupiis.ps1",
+          "managedIdentity": { "clientId": "${data.azurerm_user_assigned_identity.tfmid.client_id}" }
         }
-        EOT                    
+        EOT
   }
 
-  network_profile {
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [ data.azurerm_user_assigned_identity.tfmid.id ]
+  }
+
+  network_interface {
     name    = "networkprofileslot1"
     primary = true
 

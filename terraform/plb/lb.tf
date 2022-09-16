@@ -43,31 +43,31 @@ resource "azurerm_lb" "tfrg" {
 }
 
 resource "azurerm_lb_rule" "tfrg" {
-  resource_group_name            = var.rgname
+  //resource_group_name            = var.rgname
   loadbalancer_id                = azurerm_lb.tfrg.id
   name                           = "${var.vmss_name}-lbrule"
   protocol                       = "Tcp"
   frontend_port                  = 80
   backend_port                   = 80
   frontend_ip_configuration_name = "${var.vmss_name}-pip"
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.bpepool.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.bpepool.id]
   probe_id                       = azurerm_lb_probe.tfrg.id
 }
 
 resource "azurerm_lb_rule" "tfrg_stage" {
-  resource_group_name            = var.rgname
+  //resource_group_name            = var.rgname
   loadbalancer_id                = azurerm_lb.tfrg.id
   name                           = "${var.vmss_name}-lbrule-stage"
   protocol                       = "Tcp"
   frontend_port                  = 40080
   backend_port                   = 40080
   frontend_ip_configuration_name = "${var.vmss_name}-pip-stage"
-  backend_address_pool_id        = azurerm_lb_backend_address_pool.bpepool.id
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.bpepool.id]
   probe_id                       = azurerm_lb_probe.tfrg_stage.id
 }
 
 resource "azurerm_lb_backend_address_pool" "bpepool" {
-  resource_group_name = var.rgname
+  //resource_group_name = var.rgname
   loadbalancer_id     = azurerm_lb.tfrg.id
   name                = "${var.vmss_name}-bepool"
 }
@@ -95,7 +95,7 @@ resource "azurerm_lb_nat_pool" "lbnatpool_stage" {
 }
 
 resource "azurerm_lb_probe" "tfrg" {
-  resource_group_name = var.rgname
+  //resource_group_name = var.rgname
   loadbalancer_id     = azurerm_lb.tfrg.id
   name                = "http-probe"
   protocol            = "Http"
@@ -104,7 +104,7 @@ resource "azurerm_lb_probe" "tfrg" {
 }
 
 resource "azurerm_lb_probe" "tfrg_stage" {
-  resource_group_name = var.rgname
+  //resource_group_name = var.rgname
   loadbalancer_id     = azurerm_lb.tfrg.id
   name                = "http-probe-stage"
   protocol            = "Http"

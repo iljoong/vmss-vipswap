@@ -13,6 +13,9 @@ module "vmss" {
     
     subnet_id       = azurerm_subnet.tfdevvnet.id
     subnet_appgw_id = azurerm_subnet.tfappgwvnet.id
+
+    managedid_rgname = var.managedid_rgname
+    managedid_name   = var.managedid_name
 }
 
 data "azurerm_key_vault_secret" "password" {

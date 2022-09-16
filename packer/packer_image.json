@@ -24,7 +24,7 @@
       "winrm_username": "packer",
 
       "location": "koreacentral",
-      "vm_size": "Standard_D2s_v3",
+      "vm_size": "Standard_D2as_v4",
 
       "async_resourcegroup_delete": "true"
     }
@@ -34,11 +34,13 @@
       "type": "powershell",
       "inline": [
         "Add-WindowsFeature Web-Server,Web-Asp-Net45,NET-Framework-Features",
-        "Invoke-WebRequest https://download.visualstudio.microsoft.com/download/pr/fa3f472e-f47f-4ef5-8242-d3438dd59b42/9b2d9d4eecb33fe98060fd2a2cb01dcd/dotnet-hosting-3.1.0-win.exe -outfile $env:temp\\dotnet-hosting-3.1.0-win.exe",
 
-        "Invoke-WebRequest \"{{user `packagepath`}}\" -outfile $env:temp\\package.zip",
+        "curl.exe \"{{user `packagepath`}}\" -o $env:temp\\package.zip",
+          
+        "curl.exe https://download.visualstudio.microsoft.com/download/pr/c5e0609f-1db5-4741-add0-a37e8371a714/1ad9c59b8a92aeb5d09782e686264537/dotnet-hosting-6.0.8-win.exe -o $env:temp\\dotnet-hosting-win.exe",
 
-        "Start-Process $env:temp\\dotnet-hosting-3.1.0-win.exe  -ArgumentList '/quiet' -Wait",
+        "Start-Process $env:temp\\dotnet-hosting-win.exe -ArgumentList '/quiet' -Wait",
+
         "Expand-Archive $env:temp\\package.zip -DestinationPath C:\\inetpub\\wwwroot -Force"
       ]
     },
